@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEAL- Your Medical Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chatbot-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 800px;
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chatbot-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .chatbot-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chatbot-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            background: #2ecc71;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8f9fa;
+        }
+
+        .chat-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 15px;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e1e8ed;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            max-width: 70%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .input-field:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .send-button {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-button:active {
+            transform: translateY(0);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .medicine-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px 0;
+        }
+
+        .medicine-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .medicine-details {
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #8b0000;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ff4757;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 30px 20px;
+            color: #666;
+        }
+
+        .welcome-message h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        @media (max-width: 600px) {
+            .chatbot-container {
+                height: 100vh;
+                max-width: 100%;
+                border-radius: 0;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .chatbot-title {
+                font-size: 1.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <div class="chatbot-header">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Online</span>
+            </div>
+            <h1 class="chatbot-title">HEAL</h1>
+            <p class="chatbot-subtitle">Your 24/7 Medical Assistant</p>
+        </div>
+
+        <div class="chat-area" id="chatArea">
+            <div class="welcome-message">
+                <h3>Welcome to HEAL!</h3>
+                <p>I'm here to help you with medicine information, drug interactions, dosages, and general health guidance. How can I assist you today?</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card" onclick="sendQuickMessage('Tell me about paracetamol')">
+                        <div class="feature-icon">💊</div>
+                        <div class="feature-title">Drug Info</div>
+                    </div>
+                    <div class="feature-card" onclick="sendQuickMessage('Check drug interactions')">
+                        <div class="feature-icon">⚠️</div>
+                        <div class="feature-title">Interactions</div>
+                    </div>
+                    <div class="feature-card" onclick="sendQuickMessage('What are common side effects?')">
+                        <div class="feature-icon">🔍</div>
+                        <div class="feature-title">Side Effects</div>
+                    </div>
+                    <div class="feature-card" onclick="sendQuickMessage('Dosage calculator')">
+                        <div class="feature-icon">⚖️</div>
+                        <div class="feature-title">Dosage</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="quick-actions" id="quickActions" style="display: none;">
+                <button class="quick-action" onclick="sendQuickMessage('Drug information')">💊 Drug Info</button>
+                <button class="quick-action" onclick="sendQuickMessage('Side effects')">⚠️ Side Effects</button>
+                <button class="quick-action" onclick="sendQuickMessage('Dosage help')">⚖️ Dosage</button>
+                <button class="quick-action" onclick="sendQuickMessage('First aid')">🚑 First Aid</button>
+            </div>
+            <div class="input-container">
+                <input type="text" class="input-field" id="messageInput" placeholder="Ask me about medicines, dosages, or health concerns..." maxlength="500">
+                <button class="send-button" id="sendButton" onclick="sendMessage()">📨</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Medicine database
+        const medicineDatabase = {
+            'paracetamol': {
+                name: 'Paracetamol (Acetaminophen)',
+                uses: 'Pain relief, fever reduction',
+                dosage: 'Adults: 500-1000mg every 4-6 hours, maximum 4g per day',
+                sideEffects: 'Rare at normal doses. Overdose can cause liver damage.',
+                precautions: 'Avoid alcohol, check other medications for paracetamol content'
+            },
+            'ibuprofen': {
+                name: 'Ibuprofen',
+                uses: 'Pain relief, fever reduction, anti-inflammatory',
+                dosage: 'Adults: 200-400mg every 4-6 hours, maximum 1.2g per day',
+                sideEffects: 'Stomach upset, increased bleeding risk, kidney problems',
+                precautions: 'Take with food, avoid if you have stomach ulcers'
+            },
+            'aspirin': {
+                name: 'Aspirin',
+                uses: 'Pain relief, fever reduction, blood thinner',
+                dosage: 'Adults: 300-900mg every 4-6 hours, maximum 4g per day',
+                sideEffects: 'Stomach bleeding, increased bleeding risk',
+                precautions: 'Not for children under 16, take with food'
+            },
+            'amoxicillin': {
+                name: 'Amoxicillin',
+                uses: 'Antibiotic for bacterial infections',
+                dosage: 'Adults: 250-500mg three times daily',
+                sideEffects: 'Nausea, diarrhea, allergic reactions',
+                precautions: 'Complete full course, inform doctor of penicillin allergy'
+            },
+            'metformin': {
+                name: 'Metformin',
+                uses: 'Type 2 diabetes management',
+                dosage: 'Adults: 500mg twice daily with meals',
+                sideEffects: 'Nausea, diarrhea, metallic taste',
+                precautions: 'Take with food, regular kidney function tests needed'
+            }
+        };
+
+        // Health tips and first aid information
+        const healthTips = {
+            'fever': 'For fever: Rest, drink fluids, use paracetamol or ibuprofen as directed. Seek medical help if fever exceeds 39°C or persists.',
+            'headache': 'For headaches: Rest in a quiet, dark room. Use paracetamol or ibuprofen. Stay hydrated. Seek help for severe or persistent headaches.',
+            'stomach_pain': 'For stomach pain: Avoid solid foods temporarily, drink clear fluids. Avoid NSAIDs. Seek medical help for severe or persistent pain.',
+            'allergic_reaction': 'For allergic reactions: Stop exposure to allergen, use antihistamine. For severe reactions (difficulty breathing), call emergency services immediately.',
+            'cut': 'For cuts: Clean with water, apply pressure to stop bleeding, cover with sterile bandage. Seek medical help for deep cuts.',
+            'burn': 'For burns: Cool with cold water for 10-20 minutes, cover with sterile gauze. Seek medical help for large or severe burns.'
+        };
+
+        let chatHistory = [];
+
+        function addMessage(content, isUser = false) {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${isUser ? '👤' : '🏥'}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            // Show quick actions after first user message
+            if (isUser && chatHistory.length === 0) {
+                document.getElementById('quickActions').style.display = 'flex';
+            }
+            
+            chatHistory.push({ content, isUser, timestamp: new Date() });
+        }
+
+        function showTypingIndicator() {
+            const chatArea = document.getElementById('chatArea');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🏥</div>
+                <div class="typing-indicator">
+                    <div class="typing-dots">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            
+            chatArea.appendChild(typingDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function formatMedicineInfo(medicine) {
+            return `
+                <div class="medicine-card">
+                    <div class="medicine-name">${medicine.name}</div>
+                    <div class="medicine-details">
+                        <strong>Uses:</strong> ${medicine.uses}<br>
+                        <strong>Typical Dosage:</strong> ${medicine.dosage}<br>
+                        <strong>Common Side Effects:</strong> ${medicine.sideEffects}<br>
+                        <strong>Precautions:</strong> ${medicine.precautions}
+                    </div>
+                </div>
+                <div class="warning-box">
+                    <strong>Disclaimer:</strong> This information is for  helping you with general knowledge. Always consult a healthcare professional before taking any medication.
+                </div>
+            `;
+        }
+
+        function processMessage(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Check for specific medicine queries
+            for (const [key, medicine] of Object.entries(medicineDatabase)) {
+                if (lowerMessage.includes(key)) {
+                    return formatMedicineInfo(medicine);
+                }
+            }
+            
+            // Check for health condition queries
+            for (const [condition, advice] of Object.entries(healthTips)) {
+                if (lowerMessage.includes(condition.replace('_', ' '))) {
+                    return `<strong>Advice for ${condition.replace('_', ' ')}:</strong><br><br>${advice}<br><br><div class="warning-box"><strong>⚠️ Disclaimer:</strong> This is general guidance only. For persistent or severe symptoms, please consult a healthcare professional immediately.</div>`;
+                }
+            }
+            
+            // General medical queries
+            if (lowerMessage.includes('drug interaction') || lowerMessage.includes('interactions')) {
+                return `<strong>🔍 Drug Interactions:</strong><br><br>
+                        Drug interactions can be dangerous. Common interactions include:<br>
+                        • Blood thinners + NSAIDs (increased bleeding risk)<br>
+                        • Alcohol + Pain medications (liver damage risk)<br>
+                        • Multiple medications containing the same active ingredient<br><br>
+                        <div class="warning-box"><strong>⚠️ Important:</strong> Always inform your doctor or pharmacist about all medications you're taking, including over-the-counter drugs and supplements.</div>`;
+            }
+            
+            if (lowerMessage.includes('dosage') || lowerMessage.includes('dose')) {
+                return `<strong>⚖️ Dosage Guidelines:</strong><br><br>
+                        Proper dosing depends on:<br>
+                        • Age and weight<br>
+                        • Medical condition<br>
+                        • Other medications<br>
+                        • Kidney/liver function<br><br>
+                        <strong>General Rules:</strong><br>
+                        • Never exceed recommended dose<br>
+                        • Take with food if specified<br>
+                        • Complete antibiotic courses<br>
+                        • Don't double dose if you miss one<br><br>
+                        <div class="warning-box">Consult a healthcare professional for personalized dosing advice.</div>`;
+            }
+            
+            if (lowerMessage.includes('side effect') || lowerMessage.includes('adverse')) {
+                return `<strong>⚠️ Understanding Side Effects:</strong><br><br>
+                        <strong>Common Side Effects:</strong><br>
+                        • Nausea, upset stomach<br>
+                        • Drowsiness or dizziness<br>
+                        • Headache<br>
+                        • Skin reactions<br><br>
+                        <strong>Serious Side Effects (Seek immediate help):</strong><br>
+                        • Difficulty breathing<br>
+                        • Severe allergic reactions<br>
+                        • Chest pain<br>
+                        • Severe stomach pain<br><br>
+                        <div class="warning-box">If you experience severe side effects, stop the medication and seek medical help immediately.</div>`;
+            }
+            
+            if (lowerMessage.includes('first aid') || lowerMessage.includes('emergency')) {
+                return `<strong>🚑 Basic First Aid:</strong><br><br>
+                        <strong>Emergency Numbers:</strong> Call 108 (India) or local emergency services<br><br>
+                        <strong>Common Emergencies:</strong><br>
+                        • Severe bleeding: Apply direct pressure<br>
+                        • Choking: Back blows and abdominal thrusts<br>
+                        • Burns: Cool water for 10-20 minutes<br>
+                        • Poisoning: Call poison control immediately<br>
+                        • Heart attack: Call ambulance, give aspirin if available<br><br>
+                        <div class="warning-box">In emergencies, call professional medical help immediately. These are basic guidelines only.</div>`;
+            }
+            
+            if (lowerMessage.includes('pregnancy') || lowerMessage.includes('pregnant')) {
+                return `<strong>🤱 Medication During Pregnancy:</strong><br><br>
+                        Many medications are not safe during pregnancy. Categories include:<br>
+                        • Category A: Generally safe<br>
+                        • Category B: Probably safe<br>
+                        • Category C: Caution required<br>
+                        • Category D: Potential risk<br>
+                        • Category X: Contraindicated<br><br>
+                        <div class="warning-box"><strong>⚠️ Critical:</strong> Always consult your doctor before taking any medication during pregnancy or while breastfeeding.</div>`;
+            }
+            
+            // Greeting responses
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                return `Hello! 👋 I'm MediBot, your medical assistant. I can help you with:<br><br>
+                        • Medicine information and dosages<br>
+                        • Side effects and precautions<br>
+                        • Drug interactions<br>
+                        • Basic first aid guidance<br>
+                        • Health condition advice<br><br>
+                        How can I assist you today?`;
+            }
+            
+            // Default response
+            return `I understand you're asking about "${message}". While I have information about common medications and health topics, I'd recommend:<br><br>
+                    • Being more specific about the medication name<br>
+                    • Asking about symptoms you're experiencing<br>
+                    • Consulting with a healthcare professional for personalized advice<br><br>
+                    <div class="warning-box"><strong>Remember:</strong> I provide general information only. For medical diagnosis and treatment, please consult a qualified healthcare provider.</div>`;
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (message === '') return;
+            
+            // Add user message
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Simulate processing time
+            setTimeout(() => {
+                removeTypingIndicator();
+                const response = processMessage(message);
+                addMessage(response, false);
+            }, 1500 + Math.random() * 1000);
+        }
+
+        function sendQuickMessage(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        // Event listeners
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Auto-resize input
+        document.getElementById('messageInput').addEventListener('input', function(e) {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Initialize chat
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                addMessage(`Welcome to MediBot! 🏥<br><br>I'm here to provide information about medications, dosages, side effects, and general health guidance.<br><br><strong>Disclaimer:</strong> The information I provide is for educational purposes only and should not replace professional medical advice. Always consult with a healthcare professional for medical concerns.<br><br>How can I help you today?`, false);
+            }, 1000);
+        });
+
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add floating animation to feature cards
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.style.animation = 'fadeInUp 0.6s ease forwards';
+            });
+        });
+    </script>
+</body>
