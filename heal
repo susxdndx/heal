@@ -27,8 +27,8 @@
             border-radius: 25px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             width: 100%;
-            max-width: 800px;
-            height: 700px;
+            max-width: 1500px;
+            height: 650px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -403,7 +403,7 @@
                 <p>I'm here to help you with medicine information, drug interactions, dosages, and general health guidance. How can I assist you today?</p>
                 
                 <div class="feature-grid">
-                    <div class="feature-card" onclick="sendQuickMessage('Tell me about paracetamol')">
+                    <div class="feature-card" onclick="sendQuickMessage('Tell me how can you help me')">
                         <div class="feature-icon">💊</div>
                         <div class="feature-title">Drug Info</div>
                     </div>
@@ -468,19 +468,90 @@
                 sideEffects: 'Nausea, diarrhea, allergic reactions',
                 precautions: 'Complete full course, inform doctor of penicillin allergy'
             },
+            'sumatriptan': {
+                name: 'Sumatriptan',
+                uses: 'To treat acute migraine headaches in adults',
+                dosage: 'Adults: 25,50 0r 100 mg per day',
+                sideEffects: 'Dizziness, drowsiness, dry mouth and these side effects long last for a few days',
+                precautions: 'take this tablet under the supervision of a doctor'
+            },
+
+            'muscle cramps': {
+                name: 'Magnesium supplements',
+                uses: 'To treat muscle cramps and magnesium deficiency',
+                dosage: 'Adults: 250-500 mg per day',
+                sideEffects: 'body weakness, nausea, diarrhea and these side effects long last for a few days',
+                precautions: 'take this tablet under the supervision of a doctor'
+            },
+            'dextromethorphan': {
+                name: 'Dextromethorphan',
+                uses: 'Suppress dry, non-productive cough by acting on the cough center in the brain',
+                dosage: '15mg every 4 hours or 30mg every 6-8 hours',
+                sideEffects: 'Drowziness, dizziness, nausea and these side effects long last for a few days',
+                precautions: 'Dont drive while taking this medicine,avoid alcohol,dont exceed recommended dose'
+            },
+            'cough': {
+                name: 'Guaifenesin',
+                uses: 'To loosen mucus and phlegm in the airways, making it easier to cough up',
+                dosage: '200 mg every 4 hours or 600 mg every 12 hours',
+                sideEffects: 'Nausea, vomiting, dizziness and these side effects long last for a few days',
+                precautions: 'Drink plenty of fluids while taking this medicine,avoid alcohol'
+            },
+            'back pain': {
+                name: 'Ibuprofen or Acetaminophen',
+                uses: 'Reduce pain and inflammation and pain in muscles, joints and bones',
+                dosage: '400 mg every 8 hours',
+                sideEffects: 'Stomach upset,heartburn, dizziness and these side effects long last for a few days',
+                precautions: ' Take with food, avoid if you have stomach ulcers'
+            },
+            'quinine': {
+                name: 'Quinine',
+                uses: 'Reduce muscle cramps excitability and cramping frequency',
+                dosage: '200 mg at bedtime',
+                sideEffects: 'Nausea, headache, ringing in the ears and these side effects long last for a few days',
+                precautions: 'Monitor for hearing changes, avoid alcohol'
+            },
+            'high cholesterol': {
+                name: 'Atrorvastatin',
+                uses: 'Blocks cholesterol production in the liver and reduces LDL cholesterol levels',
+                dosage: '20 mg  once daily at night',
+                sideEffects: 'Muscle pain, liver enzyme abnormalities',
+                precautions: 'Monitor liver function, avoid grapefruit juice'
+            },
+             'fungal infections': {
+                name: 'Clotrimazole',
+                uses: 'Kills fungal organisms on skin, treat athelete’s foot, jock itch, ringworm',
+                dosage: '1% cream applied to affected area 2-3 times daily',
+                sideEffects: 'Skin irritation, burning sensation',
+                precautions: 'Continue for 2 weeks after symptoms resolve, keeep area clean and dry'
+            },
+            'asthma': {
+                name: 'Salbutamol (Albuterol) inhaler',
+                uses: 'Quickly opens airways to relieve asthma symptoms, wheezing, shortness of breath',
+                dosage: '2 puffs when needed',
+                sideEffects: 'Tremors, increased heart rate',
+                precautions: 'Rinse mouth after use, dont exceed 8 puffs/day, carry always'
+            },
+            'high blood pressure': {
+                name: 'Anlodipine',
+                uses: 'Relaxes and widens blood vessels to lower blood pressure',
+                dosage: '5-10 mg once daily',
+                sideEffects: 'Ankle swelling, dizziness, flushing',
+                precautions: 'Monitor blood pressure regularly, avoid grapefruit juice'
+            },
             'metformin': {
                 name: 'Metformin',
                 uses: 'Type 2 diabetes management',
                 dosage: 'Adults: 500mg twice daily with meals',
                 sideEffects: 'Nausea, diarrhea, metallic taste',
                 precautions: 'Take with food, regular kidney function tests needed'
-            }
+            },
         };
 
         // Health tips and first aid information
         const healthTips = {
             'fever': 'For fever: Rest, drink fluids, use paracetamol or ibuprofen as directed. Seek medical help if fever exceeds 39°C or persists.',
-            'headache': 'For headaches: Rest in a quiet, dark room. Use paracetamol or ibuprofen. Stay hydrated. Seek help for severe or persistent headaches.',
+            'headache': 'For headaches: Rest in a quiet, dark room. Use sumatriptan or ibuprofen. Stay hydrated. Seek help for severe or persistent headaches.',
             'stomach_pain': 'For stomach pain: Avoid solid foods temporarily, drink clear fluids. Avoid NSAIDs. Seek medical help for severe or persistent pain.',
             'allergic_reaction': 'For allergic reactions: Stop exposure to allergen, use antihistamine. For severe reactions (difficulty breathing), call emergency services immediately.',
             'cut': 'For cuts: Clean with water, apply pressure to stop bleeding, cover with sterile bandage. Seek medical help for deep cuts.',
@@ -636,8 +707,8 @@
             }
             
             // Greeting responses
-            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
-                return `Hello! 👋 I'm MediBot, your medical assistant. I can help you with:<br><br>
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')|| lowerMessage.includes('give me information')) {
+                return `Hello! 👋 I'm HEAL, your medical assistant. I can help you with:<br><br>
                         • Medicine information and dosages<br>
                         • Side effects and precautions<br>
                         • Drug interactions<br>
@@ -645,7 +716,49 @@
                         • Health condition advice<br><br>
                         How can I assist you today?`;
             }
+            if ( lowerMessage.includes('i love you')) {
+                return `Hello! I'm HEAL, your medical assistant.<br><br>
+                        • I also love you<br><br>
+                          How can I assist you today?`;
+            }
+            if (  lowerMessage.includes('please be my friend')) {
+                return `Hello! I'm HEAL, your medical assistant.<br><br>
+                        • You can consider me as your friend<br><br>
+                          How can I assist you today?`;
+
+            }
+            if (  lowerMessage.includes('my name is')) {
+                return `Hello! I'm HEAL, your medical assistant.<br><br>
+                        • Nice to meet you!<br><br>
+                          How can I assist you today?`; 
+
+            }
+            if (  lowerMessage.includes('my friend joydip want a girlfriend')) {
+                return `Hi! I'm HEAL,.<br><br>
+                        • I can be your AI girlfriend, joydip<br><br>
+                        op[]
+                        I can give you what you want ?`;
+                       
+            }
+            if (  lowerMessage.includes('how correct are you')) {
+                return `Hello! I'm HEAL, your medical assistant.<br><br>
+                        • My information about medicine is very accurate!<br><br>
+                        • you can trust me<br><br>
+                          How can I assist you today?`; 
+            }
+            if (  lowerMessage.includes('want to know about you')) {
+                return `Hello! I'm HEAL, your medical assistant.<br><br>
+                        • I am here for help you!<br><br>  `;
+        
+            }
             
+             
+            if (  lowerMessage.includes('how many medicines do you know')) {
+                return `Hello! I'm HEAL, your medical assistant.<br><br>
+                        • I have some sort of data on medicine!<br><br>
+                        • for further information contact team perspective<br><br>
+                          How can I assist you today?`; 
+            }
             // Default response
             return `I understand you're asking about "${message}". While I have information about common medications and health topics, I'd recommend:<br><br>
                     • Being more specific about the medication name<br>
@@ -696,7 +809,7 @@
         // Initialize chat
         window.addEventListener('load', () => {
             setTimeout(() => {
-                addMessage(`Welcome to MediBot! 🏥<br><br>I'm here to provide information about medications, dosages, side effects, and general health guidance.<br><br><strong>Disclaimer:</strong> The information I provide is for educational purposes only and should not replace professional medical advice. Always consult with a healthcare professional for medical concerns.<br><br>How can I help you today?`, false);
+                addMessage(`Welcome to HEAL! 🏥<br><br>I'm here to provide information about medications, dosages, side effects, and general health guidance.<br><br><strong>Disclaimer:</strong> The information I provide is for educational purposes only and should not replace professional medical advice. Always consult with a healthcare professional for medical concerns.<br><br>How can I help you today?`, false);
             }, 1000);
         });
 
